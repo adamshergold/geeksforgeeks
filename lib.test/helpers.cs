@@ -1,9 +1,15 @@
+using System;
 using System.Linq;
 
 namespace GeeksForGeeks.Test
 {
     public class Helpers
     {
+        public static string ArrayToString(int[] vs)
+        {
+            return String.Join(" ", vs);
+        }
+        
         public static int[] StringToArray(string sv)
         {
             var tv = sv.Trim();

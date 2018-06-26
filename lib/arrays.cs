@@ -3,12 +3,119 @@ using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Linq;
+using System.Net.Mail;
+using System.Net.NetworkInformation;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace GeeksForGeeks
 {
     public class Arrays
     {
+        public static void RotateRight(int[] vs, int n)
+        {
+            void Swap(int[] xs, int i, int j)
+            {
+                var t = xs[i];
+                xs[i] = xs[j];
+                xs[j] = t;
+            }
+            
+            void Reverse(int[] xs, int lo, int hi)
+            {
+                if (lo >= hi)
+                    return;
+
+                for (var i = 0; i < (hi - lo + 1) / 2; i++)
+                {
+                    Swap(xs,lo+i,hi-i);
+                }
+            }
+
+            var p = vs.Length - 1 - (n % vs.Length);
+
+            Reverse(vs, 0, p);
+            Reverse(vs, p + 1, vs.Length - 1);
+            Reverse(vs,0,vs.Length-1);
+        }
+        
+        private class LargestComparer : System.Collections.Generic.IComparer<string>
+        {
+            public int Compare(string lv, string rv)
+            {
+                var ml = System.Math.Max(lv.Length, rv.Length);
+                var lc = lv.PadRight(ml, lv[lv.Length - 1]);
+                var rc = rv.PadRight(ml, rv[rv.Length - 1]);
+                return rc.CompareTo(lc);
+            }
+                
+        }
+        public static string LargestNumberFromArray(int[] vs)
+        {
+            var sl = new System.Collections.Generic.SortedList<string, int>( new LargestComparer() );
+            foreach (var v in vs)
+            {
+                sl.Add(v.ToString(), v);
+            }
+
+            return String.Join("", sl.Values.Select(v => v.ToString()));
+        }
+
+        public static int Platforms(string sArrivals, string sDepartures)
+        {
+            int HHMM(string hhmm)
+            {
+                if (hhmm.Length == 4)
+                {
+                    var hh = System.Convert.ToInt32(hhmm.Substring(0, 2));
+                    var mm = System.Convert.ToInt32(hhmm.Substring(2, 2));
+                    return mm + hh * 60;
+                }
+                else if (hhmm.Length == 3)
+                {
+                    var hh = System.Convert.ToInt32(hhmm.Substring(0, 1));
+                    var mm = System.Convert.ToInt32(hhmm.Substring(1, 2));
+                    return mm + hh * 60;
+                }
+                else
+                {
+                    throw new System.Exception( "Invalid HHMM");
+                }
+            }
+
+            var arrivals = 
+                sArrivals.Split(new char[] { ' ' },System.StringSplitOptions.RemoveEmptyEntries).Select(v => HHMM(v)).ToArray();
+
+            var departures = 
+                sDepartures.Split(new char[] { ' ' },System.StringSplitOptions.RemoveEmptyEntries).Select(v => HHMM(v)).ToArray();
+
+            int max = 1, cmax = 1;
+            int lhs = arrivals[0], rhs = departures[0];
+
+            if( arrivals.Length != departures.Length)
+            {
+                throw new System.Exception("Invalid input!");
+            }
+            
+            for (var i = 1; i < arrivals.Length; i++)
+            {
+                if (arrivals[i] > rhs)
+                {
+                    lhs = arrivals[i];
+                    rhs = departures[i];
+                    max = System.Math.Max(cmax, max);
+                    cmax = 1;
+                }
+                else
+                {
+                    cmax++;
+                    rhs = System.Math.Max(rhs, departures[i]);
+                }
+            }
+
+            return System.Math.Max(cmax, max);
+        }
+        
         public static string Leaders(int[] vs)
         {
             var leaders = new Stack<int>();
